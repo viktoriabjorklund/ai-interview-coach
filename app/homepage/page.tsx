@@ -1,5 +1,5 @@
 import React from "react";
-import JobDescriptionForm from "../components/JobDescriptionForm";
+import JobDescriptionForm from "../../components/JobDescriptionForm";
 
 
 export default function HomePage() {
