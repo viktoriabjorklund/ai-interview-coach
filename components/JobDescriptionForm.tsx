@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export default function JobDescriptionForm() {
+function JobDescriptionForm() {
   return (
     <form className="mt-10 space-y-6">
       {/* Role */}
@@ -13,7 +13,7 @@ export default function JobDescriptionForm() {
         </label>
         <input
           type="text"
-          placeholder="Junior Software Engineer..."
+          placeholder="Role..."
           className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-brandBlue focus:outline-none focus:ring-1 focus:ring-brandBlue"
         />
       </div>
@@ -26,7 +26,7 @@ export default function JobDescriptionForm() {
         </label>
         <input
           type="text"
-          placeholder="Amazon..."
+          placeholder="Company..."
           className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-brandBlue focus:outline-none focus:ring-1 focus:ring-brandBlue"
         />
       </div>
@@ -66,3 +66,5 @@ export default function JobDescriptionForm() {
     </form>
   );
 }
+
+export default JobDescriptionForm;
