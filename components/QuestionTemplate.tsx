@@ -88,7 +88,7 @@ function QuestionTemplate({
           {/* Modellens svar */}
           <div className="rounded-md bg-[#195383] px-4 py-4">
             <p className="mb-2 text-base font-semibold text-slate-100">
-              Model answer (mock)
+              Feedback (mock)
             </p>
             <p className="whitespace-pre-wrap text-base text-white">
               {finalModelAnswer}
