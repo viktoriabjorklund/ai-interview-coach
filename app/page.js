@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { getStudyPlan } from "./services/study-plan-service";
-import { getInterviewQuestion } from "./services/interview-question-service";
+import { getStudyPlan } from "./questionpage/services/study-plan-service";
+import { getInterviewQuestion } from "./questionpage/services/interview-question-service";
 
 export default function Page() {
   const [jobTitle, setJobTitle] = useState("");

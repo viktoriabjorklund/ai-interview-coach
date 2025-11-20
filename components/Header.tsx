@@ -11,7 +11,7 @@ function Header() {
   const navItems = [
     { label: "Start", href: "/homepage" },   // ändra till "/" om ni vill
     { label: "Study plan", href: "/study-plan" },
-    { label: "Practice", href: "/practice" },
+    { label: "Practice", href: "/questionpage" },
   ];
 
   const handleNavigate = (href: string) => {
