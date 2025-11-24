@@ -1,3 +1,4 @@
+// app/api/study-plan/route.ts
 import { openai } from "@/lib/openai";
 
 export async function POST(req) {
@@ -26,20 +27,52 @@ Skapa en konkret överblick för vad som förväntas inför en teknisk intervju.
 
 Jobbtitel: ${jobTitle}
 Företag: ${company}
-Jobbbeskrivning (kan vara tom): ${jobDescription || "Ingen beskriven."}
+Jobbbeskrivning (kan vara tom): ${
+                jobDescription || "Ingen beskriven."
+              }
 
-Returnera SVARET SOM REN JSON med följande struktur (exakt typer, inga extra fält):
+Returnera SVARET SOM REN JSON med följande struktur (exakt fältnamn, inga extra fält):
 
 {
   "focus_area": "kort text som beskriver vad intervjun kommer att fokusera på",
+
   "key_skills": [
-    "kort namn på en viktig kompetens eller teknik",
-    "ytterligare viktig kompetens"
+    [
+      "första kompetens i kolumn 1",
+      "andra kompetens i kolumn 1"
+    ],
+    [
+      "första kompetens i kolumn 2",
+      "andra kompetens i kolumn 2"
+    ]
   ],
-  "example_questions": [
-    "exempel på vanlig intervjufråga 1",
-    "exempel på vanlig intervjufråga 2"
-  ],
+
+  "question_types": {
+    "groups": [
+      {
+        "heading": "1. Technical",
+        "items": [
+          "exempel på teknisk fråga 1",
+          "exempel på teknisk fråga 2"
+        ]
+      },
+      {
+        "heading": "2. Behavioral",
+        "items": [
+          "exempel på beteendefråga 1",
+          "exempel på beteendefråga 2"
+        ]
+      },
+      {
+        "heading": "3. Practical",
+        "items": [
+          "exempel på praktisk fråga 1",
+          "exempel på praktisk fråga 2"
+        ]
+      }
+    ]
+  },
+
   "preparation": [
     "konkret bullet point för hur användaren bör förbereda sig",
     "ytterligare konkret förberedelse-punkt",
@@ -58,10 +91,7 @@ VIKTIGT:
       ],
     });
 
-    // 1) Hämta rå text från modellen
     const raw = response.output_text;
-
-    // 2) Städa bort ev. ```json ... ``` runt svaret
     let cleaned = raw.trim();
 
     if (cleaned.startsWith("```")) {
@@ -81,7 +111,7 @@ VIKTIGT:
       return Response.json(
         {
           error: "Modellen returnerade ogiltig JSON.",
-          raw, // behåll raw för debugging
+          raw,
         },
         { status: 500 }
       );
