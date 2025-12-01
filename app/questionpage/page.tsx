@@ -203,12 +203,8 @@ export default function QuestionPage() {
               question={currentQuestion}
               answer={answer}
               submitted={mode === "feedback"}
-              // Visa AI:n “ideal answer” (outline) eller själva feedback-texten
-              modelAnswer={
-                feedback?.outline
-                  ? feedback.outline.join("\n")
-                  : feedback?.text ?? null
-              }
+              // Nu visar vi alltid den coachande feedbacken, inte ideal-svaret
+              modelAnswer={feedback?.text ?? null}
               onAnswerChange={setAnswer}
               onSubmit={handleSubmitCurrent}
             />
