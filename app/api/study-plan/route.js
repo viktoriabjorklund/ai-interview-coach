@@ -14,8 +14,21 @@ export async function POST(req) {
 
     const response = await openai.responses.create({
       model: "gpt-4.1-mini",
-      instructions:
-        "Du är en expertcoach för tekniska intervjuer. Du skapar en överblickande roadmap för vad som förväntas av kandidaten i JSON-format.",
+      instructions: `
+You are an expert coach for technical interviews.
+
+Your task:
+- Create a concise, high-level study plan for a candidate preparing for a technical interview.
+- The output must ALWAYS be valid JSON, matching the exact schema provided below.
+- All text (focus_area, skills, questions, preparation) must be in English.
+- Assume the candidate is a recent graduate / junior engineer.
+
+Use the following principles:
+- Base the content on the role, company, and job description.
+- Keep everything concrete and short (no long paragraphs).
+- Focus on what the candidate should revise and what question types to expect.
+- Tailor the plan to a JUNIOR-level role (no senior / architect-heavy expectations).
+      `,
       input: [
         {
           role: "user",
@@ -23,27 +36,32 @@ export async function POST(req) {
             {
               type: "input_text",
               text: `
-Skapa en konkret överblick för vad som förväntas inför en teknisk intervju.
+Create a concrete overview of what is expected from a candidate before a technical interview.
 
-Jobbtitel: ${jobTitle}
-Företag: ${company}
-Jobbbeskrivning (kan vara tom): ${
-                jobDescription || "Ingen beskriven."
-              }
+Role context:
+Job title: ${jobTitle}
+Company: ${company}
+Job description (may be empty): ${jobDescription || "No description provided."}
 
-Returnera SVARET SOM REN JSON med följande struktur (exakt fältnamn, inga extra fält):
+Use the job title and job description to:
+- Identify the main focus area of the interview (e.g. "Frontend fundamentals with React", "Backend APIs with Node.js", "Data analysis with Python").
+- Propose key skills the candidate should review (grouped into two columns for layout).
+- Suggest realistic example questions for different question types (technical, behavioral, practical).
+- Suggest specific preparation steps and useful tools/websites for practice.
+
+Return the ANSWER AS PURE JSON with the following structure (exact field names, no extra fields):
 
 {
-  "focus_area": "kort text som beskriver vad intervjun kommer att fokusera på",
+  "focus_area": "short text describing what the interview will mainly focus on",
 
   "key_skills": [
     [
-      "första kompetens i kolumn 1",
-      "andra kompetens i kolumn 1"
+      "first skill in column 1",
+      "second skill in column 1"
     ],
     [
-      "första kompetens i kolumn 2",
-      "andra kompetens i kolumn 2"
+      "first skill in column 2",
+      "second skill in column 2"
     ]
   ],
 
@@ -52,39 +70,41 @@ Returnera SVARET SOM REN JSON med följande struktur (exakt fältnamn, inga extr
       {
         "heading": "1. Technical",
         "items": [
-          "exempel på teknisk fråga 1",
-          "exempel på teknisk fråga 2"
+          "example of a technical question 1",
+          "example of a technical question 2"
         ]
       },
       {
         "heading": "2. Behavioral",
         "items": [
-          "exempel på beteendefråga 1",
-          "exempel på beteendefråga 2"
+          "example of a behavioral question 1",
+          "example of a behavioral question 2"
         ]
       },
       {
         "heading": "3. Practical",
         "items": [
-          "exempel på praktisk fråga 1",
-          "exempel på praktisk fråga 2"
+          "example of a practical question 1",
+          "example of a practical question 2"
         ]
       }
     ]
   },
 
   "preparation": [
-    "konkret bullet point för hur användaren bör förbereda sig",
-    "ytterligare konkret förberedelse-punkt",
-    "tipsa gärna om vilka verktyg eller hemsidor som kan användas för att öva på kunskaperna som efterfrågas"
+    "concrete bullet point on how the candidate should prepare",
+    "another concrete preparation point",
+    "include at least one tip about specific tools or websites that can be used to practice the required skills"
   ]
 }
 
-VIKTIGT:
-- Svara *endast* med giltig JSON.
-- Skriv INTE \`\`\`json eller andra code blocks runt svaret.
-- Ingen extra text före eller efter JSON:et.
-              `,
+Additional requirements:
+- All strings must be concise and directly relevant to the provided role.
+- Do NOT add any fields outside the schema above.
+- Answer ONLY with valid JSON.
+- Do NOT wrap the JSON in \`\`\`json or any other code fences.
+- No extra text before or after the JSON.
+            `,
             },
           ],
         },
