@@ -18,7 +18,6 @@ type HistoryItem = {
 type Mode = "idle" | "answering" | "feedback";
 
 export default function QuestionPage() {
-  // Enkel “target” för hur många frågor man tänker köra
   const TOTAL_QUESTIONS = 5;
   const searchParams = useSearchParams();
 
@@ -26,7 +25,6 @@ export default function QuestionPage() {
   const company = searchParams.get("company") || "";
   const jobDescription = searchParams.get("jobDescription") || "";
 
-  // Intervju-state
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [answer, setAnswer] = useState("");
@@ -50,7 +48,7 @@ export default function QuestionPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Hämta första fråga direkt när sidan laddar
+  // 🟦 Hämta första frågan direkt
   useEffect(() => {
     fetchFirstQuestion();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,7 +68,7 @@ export default function QuestionPage() {
         jobTitle,
         company,
         jobDescription,
-        history: [], // ingen historik första gången
+        history: [],
       });
 
       setCurrentQuestion(data.next_question || "");
@@ -83,13 +81,13 @@ export default function QuestionPage() {
 
       setMode("answering");
     } catch (err: any) {
-      setError(err.message || "Något gick fel när första frågan skulle hämtas.");
+      setError(err.message || "Something went wrong when fetching the question.");
     } finally {
       setLoading(false);
     }
   }
 
-  // SUBMIT: användaren skickar sitt svar → få feedback + nästa fråga från API
+  // 🟩 När användaren skickar in sitt svar
   async function handleSubmitCurrent() {
     if (!currentQuestion || !answer.trim()) return;
 
@@ -130,18 +128,16 @@ export default function QuestionPage() {
         suggested_ideal_answer_outline: data.suggested_ideal_answer_outline,
       }));
 
-      // Spara nästa fråga men visa den först när användaren klickar "Next question"
       setQueuedNextQuestion(data.next_question || "");
-
       setMode("feedback");
     } catch (err: any) {
-      setError(err.message || "Något gick fel när feedback skulle hämtas.");
+      setError(err.message || "Something went wrong when fetching feedback.");
     } finally {
       setLoading(false);
     }
   }
 
-  // NEXT QUESTION: gå vidare till queuedNextQuestion
+  // 🟨 Nästa fråga
   function handleNextQuestion() {
     if (!queuedNextQuestion) return;
     if (history.length >= TOTAL_QUESTIONS) return;
@@ -153,64 +149,98 @@ export default function QuestionPage() {
     setMode("answering");
   }
 
-  const currentIndex = history.length; // hur många färdiga frågor
+  const currentIndex = history.length;
   const questionNumber = currentIndex + 1;
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f3f4f6]">
       <Header />
 
-      {/* Vänstra hörnet */}
-      <div className="fixed left-10 top-24 z-20 space-y-2">
-        <p className="mb-4 text-xl font-medium text-slate-700">
-          Question {questionNumber} out of {TOTAL_QUESTIONS}
-        </p>
-        <button
-          type="button"
-          onClick={handleNextQuestion}
-          disabled={
-            loading ||
-            !queuedNextQuestion ||
-            history.length >= TOTAL_QUESTIONS ||
-            mode !== "feedback"
-          }
-          className="rounded-md bg-slate-700 px-4 py-2 text-base font-medium text-white hover:bg-slate-900 disabled:opacity-60"
-        >
-          Next question
-        </button>
-      </div>
+      {/* 🟦 LOADING OVERLAY */}
+      {loading && (
+        <div className="flex flex-1 items-center justify-center">
+          <div className="flex flex-col items-center">
+            <svg
+              className="animate-spin h-10 w-10 text-slate-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8H4z"
+              ></path>
+            </svg>
 
-      {/* Main card */}
-      <main className="flex flex-1 items-center justify-center px-4 py-10">
-        <div className="mx-auto w-full max-w-4xl rounded-3xl bg-white px-10 py-12 shadow-md">
-          <h1 className="mt-6 text-center text-2xl font-semibold leading-relaxed text-slate-900">
-            AI Interview Practice
-          </h1>
-
-          {questionMeta && (
-            <p className="mt-4 text-center text-sm text-gray-500">
-              Focus area: {questionMeta.focus_area} • Difficulty:{" "}
-              {questionMeta.difficulty}
+            <p className="mt-4 text-slate-600 text-sm">
+              Generating your question...
             </p>
-          )}
-
-          {error && (
-            <p className="mt-4 text-center text-sm text-red-600">{error}</p>
-          )}
-
-          <div className="mx-auto mt-8 max-w-sm">
-            <QuestionTemplate
-              question={currentQuestion}
-              answer={answer}
-              submitted={mode === "feedback"}
-              // Nu visar vi alltid den coachande feedbacken, inte ideal-svaret
-              modelAnswer={feedback?.text ?? null}
-              onAnswerChange={setAnswer}
-              onSubmit={handleSubmitCurrent}
-            />
           </div>
         </div>
-      </main>
+      )}
+
+      {/* 🟩 MAIN CONTENT — visas endast när vi INTE laddar */}
+      {!loading && (
+        <>
+          <div className="fixed left-10 top-24 z-20 space-y-2">
+            <p className="mb-4 text-xl font-medium text-slate-700">
+              Question {questionNumber} out of {TOTAL_QUESTIONS}
+            </p>
+            <button
+              type="button"
+              onClick={handleNextQuestion}
+              disabled={
+                loading ||
+                !queuedNextQuestion ||
+                history.length >= TOTAL_QUESTIONS ||
+                mode !== "feedback"
+              }
+              className="rounded-md bg-slate-700 px-4 py-2 text-base font-medium text-white hover:bg-slate-900 disabled:opacity-60"
+            >
+              Next question
+            </button>
+          </div>
+
+          <main className="flex flex-1 items-center justify-center px-4 py-10">
+            <div className="mx-auto w-full max-w-4xl rounded-3xl bg-white px-10 py-12 shadow-md">
+              <h1 className="mt-6 text-center text-2xl font-semibold leading-relaxed text-slate-900">
+                AI Interview Practice
+              </h1>
+
+              {questionMeta && (
+                <p className="mt-4 text-center text-sm text-gray-500">
+                  Focus area: {questionMeta.focus_area} • Difficulty:{" "}
+                  {questionMeta.difficulty}
+                </p>
+              )}
+
+              {error && (
+                <p className="mt-4 text-center text-sm text-red-600">{error}</p>
+              )}
+
+              <div className="mx-auto mt-8 max-w-sm">
+                <QuestionTemplate
+                  question={currentQuestion}
+                  answer={answer}
+                  submitted={mode === "feedback"}
+                  modelAnswer={feedback?.text ?? null}
+                  onAnswerChange={setAnswer}
+                  onSubmit={handleSubmitCurrent}
+                />
+              </div>
+            </div>
+          </main>
+        </>
+      )}
 
       <Footer />
     </div>
