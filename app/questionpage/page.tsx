@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import QuestionTemplate from "@/components/QuestionTemplate";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import { getInterviewQuestion } from "@/services/interview-question-service";
+
 
 // Typen på en historikpost som ditt API förväntar sig
 type HistoryItem = {
@@ -28,6 +29,8 @@ export default function QuestionPage() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [answer, setAnswer] = useState("");
+  const router = useRouter();
+
 
   const [mode, setMode] = useState<Mode>("idle");
 
@@ -149,8 +152,24 @@ export default function QuestionPage() {
     setMode("answering");
   }
 
-  const currentIndex = history.length;
-  const questionNumber = currentIndex + 1;
+  const hasCompletedAll = history.length >= TOTAL_QUESTIONS && mode === "feedback";
+  const primaryButtonLabel = hasCompletedAll ? "Back to home" : "Next question";
+
+  function handlePrimaryButtonClick() {
+    if (hasCompletedAll) {
+      router.push("/homepage"); // eller den route du vill hem till
+    } else {
+      handleNextQuestion();
+    }
+  }
+
+  const questionNumber =
+  mode === "feedback"
+    ? Math.max(1, Math.min(history.length, TOTAL_QUESTIONS)) // visa aktuell besvarad fråga
+    : Math.min(history.length + 1, TOTAL_QUESTIONS);
+ 
+
+
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f3f4f6]">
@@ -197,17 +216,21 @@ export default function QuestionPage() {
             </p>
             <button
               type="button"
-              onClick={handleNextQuestion}
+              onClick={handlePrimaryButtonClick}
               disabled={
-                loading ||
-                !queuedNextQuestion ||
-                history.length >= TOTAL_QUESTIONS ||
-                mode !== "feedback"
+                !hasCompletedAll && (
+                  loading ||
+                  !queuedNextQuestion ||
+                  history.length >= TOTAL_QUESTIONS ||
+                  mode !== "feedback"
+                )
               }
               className="rounded-md bg-slate-700 px-4 py-2 text-base font-medium text-white hover:bg-slate-900 disabled:opacity-60"
             >
-              Next question
+              {primaryButtonLabel}
             </button>
+
+
           </div>
 
           <main className="flex flex-1 items-center justify-center px-4 py-10">
