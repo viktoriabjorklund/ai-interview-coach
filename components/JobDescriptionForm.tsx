@@ -1,4 +1,5 @@
 "use client";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -18,12 +19,13 @@ function JobDescriptionForm() {
   // 🟦 Ladda tidigare sparade värden vid first render
   useEffect(() => {
     const saved = loadJobFormData();
-    if (saved) {
-      setRole(saved.role);
-      setCompany(saved.company);
-      setJobDescription(saved.jobDescription);
-    }
+    if (!saved) return;
+  
+    setRole(saved.role);
+    setCompany(saved.company);
+    setJobDescription(saved.jobDescription);
   }, []);
+  
 
   // 🟩 Spara till localStorage varje gång något ändras
   useEffect(() => {
